@@ -3,6 +3,7 @@ from unittest.mock import mock_open, patch
 import pytest
 
 from langchain_groq.transcription import TranscriptionGroq
+from unittest.mock import MagicMock
 
 
 def test_init_without_api_key_raises() -> None:
@@ -16,7 +17,7 @@ def test_init_without_api_key_raises() -> None:
 
 @patch("builtins.open", new_callable=mock_open, read_data=b"audio data")
 @patch("httpx.post")
-def test_transcribe_success(mock_post, mock_file) -> None:
+def test_transcribe_success(mock_post: MagicMock, mock_file: MagicMock) -> None:
     mock_post.return_value.status_code = 200
     mock_post.return_value.json.return_value = {"text": "Hello world"}
 
@@ -29,12 +30,13 @@ def test_transcribe_success(mock_post, mock_file) -> None:
     # ✅ Optional but useful assertion
     called_files = mock_post.call_args.kwargs["files"]
     assert isinstance(called_files, dict)
-    assert any(f[0] == "file" for f in called_files)
+    assert "file" in called_files
+    assert "model" in called_files
 
 
 @patch("builtins.open", new_callable=mock_open, read_data=b"audio data")
 @patch("httpx.post")
-def test_transcribe_failure(mock_post, mock_file) -> None:
+def test_transcribe_failure(mock_post: MagicMock, mock_file: MagicMock) -> None:
     mock_post.return_value.status_code = 400
     mock_post.return_value.text = "Bad request"
 
